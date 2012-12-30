@@ -71,7 +71,7 @@ Getting Started (with debug & release)
     
     > Don't forget to make these calls. StoreController has to know that you opened/closed your in-app purchase store. Just to make it clear: the in-app purchase store is where you sell virtual goods (and not Google Play or App Store).
 
-6. You'll need an event handler in order to be notified about in-app purchasing related events. refer to the [Event Handling]() section for more information.
+6. You'll need an event handler in order to be notified about in-app purchasing related events. refer to the [Event Handling](https://github.com/soomla/unity3d-store#event-handling) section for more information.
 
 And that's it ! You have storage and in-app purchasing capabilities... ALL-IN-ONE.
 
