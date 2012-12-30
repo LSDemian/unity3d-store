@@ -110,35 +110,67 @@ Storage & Meta-Data
 
 When you initialize StoreController, it automatically initializes two other classes: StoreInventory and StoreInfo.   
 - StoreInventory is a convinience class to let you perform operations on VirtualCurrencies and VirtualGoods. Use it to fetch/change the balances of VirtualItems in your game (using their ItemIds!)
-- StoreInfo is where all meta data information about your specific game can be retrieved. It is initialized with your implementation of IStoreAssets and you can use it to retrieve information about your specific game.
-**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you shoule make as little calls as possible to StoreInfo. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to StoreInfo. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleLocalStoreInfo.cs))**
+- StoreInfo is where all meta data information about your specific game can be retrieved. It is initialized with your implementation of IStoreAssets and you can use it to retrieve information about your specific game.  
+**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you shoule make as little calls as possible to StoreInfo. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to StoreInfo. We update this cache using an event handler. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleLocalStoreInfo.cs) and [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).**
 
 The on-device storage is encrypted and kept in a SQLite database. SOOMLA is preparing a cloud-based storage service that'll allow this SQLite to be synced to a cloud-based repository that you'll define.
 
 **Example Usages**
 
+* Get VirtualCurrency with itemId "currency_coin":
+
+    ```cs
+    VirtualCurrency coin = StoreInfo.GetVirtualCurrencyByItemId("currency_coin");
+    ``` 
+
 * Add 10 coins to the virtual currency with itemId "currency_coin":
 
-    ```Java
-    VirtualCurrency coin = StoreInfo.getVirtualCurrencyByItemId("currency_coin");
-    StorageManager.getVirtualCurrencyStorage().add(coin, 10);
+    ```cs
+    StoreInventory.AddCurrencyAmount("currency_coin", 10);
     ```
     
 * Remove 10 virtual goods with itemId "green_hat":
 
-    ```Java
-    VirtualGood greenHat = StoreInfo.getVirtualGoodByItemId("green_hat");
-    StorageManager.getVirtualGoodsStorage().remove(greenHat, 10);
+    ```cs
+    StoreInventory.RemoveGoodAmount("green_hat", 10);
     ```
     
 * Get the current balance of green hats (virtual goods with itemId "green_hat"):
 
-    ```Java
-    VirtualGood greenHat = StoreInfo.getVirtualGoodByItemId("green_hat");
-    int greenHatsBalance = StorageManager.getVirtualGoodsStorage().getBalance(greenHat);
+    ```cs
+    int greenHatsBalance = StoreInventory.GetGoodBalance("green_hat");
     ```
 
+Event Handling
+---
 
+SOOMLA lets you create your own event handler and add it to StoreEventHandlers. That way you'll be able to get notifications on various events and implement your own application specific behaviour to those events.
 
+> Your behaviour is an addition to the default behaviour implemented by SOOMLA. You don't replace SOOMLA's behaviour.
+
+In order to create your event handler:
+
+1. Create a class that implements IStoreEventHandler (see [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).
+2. Add the created class to StoreEventHandlers:
+ `StoreEventHandlers.AddEventHandler(new YourEventHandler());`
+
+Contribution
+---
+
+We want you!
+
+Fork -> Clone -> Implement -> Test -> Pull-Request. We have great RESPECT for contributors.
+
+SOOMLA, Elsewhere ...
+---
+
++ [Website](http://project.soom.la/)
++ [On Facebook](https://www.facebook.com/pages/The-SOOMLA-Project/389643294427376).
++ [On AngelList](https://angel.co/the-soomla-project)
+
+License
+---
+MIT License. Copyright (c) 2012 SOOMLA. http://project.soom.la
++ http://www.opensource.org/licenses/MIT
 
 
