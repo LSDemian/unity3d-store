@@ -1,6 +1,6 @@
 *This project is a part of [The SOOMLA Project](http://project.soom.la) which is a series of open source initiatives with a joint goal to help mobile game developers get better stores and more in-app purchases.*
 
-Didn't you ever wanted an in-app purchase one liner that looks like this ?!
+Haven't you ever wanted an in-app purchase one liner that looks like this ?!
 
 ```cs
     StoreController.BuyCurrencyPack("[Product id here]");
@@ -14,7 +14,7 @@ The unity3d-store is the Unity3D flavour of The SOOMLA Project. This project use
 - ios-store [project](https://github.com/soomla/ios-store) [wiki](https://github.com/soomla/ios-store/wiki)
 - android-store [project](https://github.com/soomla/android-store) [wiki](https://github.com/soomla/android-store/wiki)
 
->Soon, SOOMLA is going to provide developers with storefront capabilities through [Store Designer](designer.soom.la).
+>Soon, SOOMLA is going to provide developers with storefront capabilities through [Store Designer](http://designer.soom.la).
 
 Download
 ---
@@ -41,7 +41,7 @@ Getting Started (with debug & release)
 1. Download the unity3d-store unityproject file you want and double-click it. It'll import all the necessary files into your project.
 2. Drag the "Soomla" Prefab into your scene. You should see it listed in the "Hierarchy" panel.
 3. Click on the "Soomla" Prefab you just added and in the "Inspector" panel change the values for "Custom Secret", "Public Key" and "Soom Sec":
-    - "Custom Secret" - is an encryption secret you provide that'll be used to secure your data.
+    - "Custom Secret" - is an encryption secret you provide that will be used to secure your data.
     - "Public Key" - is the public key given to you from Google. (iOS doesn't have a public key).
     - "Soom Sec" - is a special secret SOOMLA uses to increase your data protection.  
     **Choose both secrets wisely. You can't change them after you launch your game!**
@@ -51,11 +51,11 @@ Getting Started (with debug & release)
        StoreController.Initialize(new YourStoreAssetsImplementation());
     ```
     
-    > Initialize StoreController ONLY ONCE when your application loads.
+    > Initialize _StoreController_ ONLY ONCE when your application loads.
     
-    > Initialize StoreController in the "Start()" function of a 'MonoBehaviour' and **NOT** in the "Awake()" function. SOOMLA has its own 'MonoBehaviour' and it needs to be "Awaked" before you initialize.
+    > Initialize _StoreController_ in the "Start()" function of a 'MonoBehaviour' and **NOT** in the "Awake()" function. SOOMLA has its own 'MonoBehaviour' and it needs to be "Awakened" before you initialize.
 
-5. Now, that you have StoreController loaded, just decide when you want to show/hide your store's UI to the user and let StoreController know about it:
+5. Now, that you have _StoreController_ loaded, just decide when you want to show/hide your store's UI to the user and let _StoreController_ know about it:
 
   When you show the store call:
 
@@ -69,7 +69,7 @@ Getting Started (with debug & release)
     StoreController.storeClosing();
     ```
     
-    > Don't forget to make these calls. StoreController has to know that you opened/closed your in-app purchase store. Just to make it clear: the in-app purchase store is where you sell virtual goods (and not Google Play or App Store).
+    > Don't forget to make these calls. _StoreController_ has to know that you opened/closed your in-app purchase store. Just to make it clear: the in-app purchase store is where you sell virtual goods (and not Google Play or App Store).
 
 6. You'll need an event handler in order to be notified about in-app purchasing related events. refer to the [Event Handling](https://github.com/soomla/unity3d-store#event-handling) section for more information.
 
@@ -78,7 +78,7 @@ And that's it ! You have storage and in-app purchasing capabilities... ALL-IN-ON
 What's next? In App Purchasing.
 ---
 
-unity3d-store provides you with VirtualCurrencyPacks. VirtualCurrencyPack is a representation of a "bag" of currencies that you want to let your users purchase in Google Play or App Store. You define VirtualCurrencyPacks in your game specific assets file which is your implemetation of IStoreAssets ([example](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/MuffinRushAssets.cs)). After you do that you can call StoreController to make actual purchases and unity3d-store will take care of the rest.
+unity3d-store provides you with VirtualCurrencyPacks. VirtualCurrencyPack is a representation of a "bag" of currency units that you want to let your users purchase in Google Play or App Store. You define VirtualCurrencyPacks in your game specific assets file which is your implementation of `IStoreAssets` ([example](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/MuffinRushAssets.cs)). After you do that you can call _StoreController_ to make actual purchases and unity3d-store will take care of the rest.
 
 Example:
 
@@ -92,28 +92,28 @@ VirtualCurrencyPack TEN_COINS_PACK = new VirtualCurrencyPack(
         "10_coins",                // item id
         "com.soomla.ten_coin_pack",// product id in Google Market AND App Store !
         1.99,                      // actual price in $$
-        10,                        // number of currencies in the pack
+        10,                        // number of currency units in the pack
         COIN_CURRENCY);            // the associated currency
 ```
      
-Now you can use StoreController to call Google Play or the App Store's in-app purchasing mechanism:
+Now you can use _StoreController_ to call Google Play or the App Store's in-app purchasing mechanism:
 
 ```cs
 StoreController.BuyCurrencyPack(TEN_COINS_PACK.MarketItem.ProductId);
 ```
     
 And that's it! unity3d-store knows how to contact Google Play or the App Store for you and redirect the user to the purchasing mechanism.
-Don't forget to define your IStoreEventHandler in order to get the events of successful or failed purchases (see [Event Handling](https://github.com/soomla/unity3d-store#event-handling)).
+Don't forget to define your _IStoreEventHandler_ in order to get the events of successful or failed purchases (see [Event Handling](https://github.com/soomla/unity3d-store#event-handling)).
 
 Storage & Meta-Data
 ---
 
-When you initialize StoreController, it automatically initializes two other classes: StoreInventory and StoreInfo.   
-- StoreInventory is a convinience class to let you perform operations on VirtualCurrencies and VirtualGoods. Use it to fetch/change the balances of VirtualItems in your game (using their ItemIds!)
-- StoreInfo is where all meta data information about your specific game can be retrieved. It is initialized with your implementation of IStoreAssets and you can use it to retrieve information about your specific game.  
-**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you shoule make as little calls as possible to StoreInfo. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to StoreInfo. We update this cache using an event handler. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleLocalStoreInfo.cs) and [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).**
+When you initialize _StoreController_, it automatically initializes two other classes: _StoreInventory_ and _StoreInfo_.
+- _StoreInventory_ is a convenience class to let you perform operations on VirtualCurrencies and VirtualGoods. Use it to fetch/change the balances of VirtualItems in your game (using their ItemIds!)
+- _StoreInfo_ is where all meta data information about your specific game can be retrieved. It is initialized with your implementation of `IStoreAssets` and you can use it to retrieve information about your specific game.
+**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you should make as little calls as possible to _StoreInfo_. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to _StoreInfo_. We update this cache using an event handler. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleLocalStoreInfo.cs) and [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).**
 
-The on-device storage is encrypted and kept in a SQLite database. SOOMLA is preparing a cloud-based storage service that'll allow this SQLite to be synced to a cloud-based repository that you'll define.
+The on-device storage is encrypted and kept in a SQLite database. SOOMLA is preparing a cloud-based storage service that will allow this SQLite to be synced to a cloud-based repository that you'll define.
 
 **Example Usages**
 
@@ -144,14 +144,14 @@ The on-device storage is encrypted and kept in a SQLite database. SOOMLA is prep
 Event Handling
 ---
 
-SOOMLA lets you create your own event handler and add it to StoreEventHandlers. That way you'll be able to get notifications on various events and implement your own application specific behaviour to those events.
+SOOMLA lets you create your own event handler and add it to _StoreEventHandlers_. That way you'll be able to get notifications on various events and implement your own application specific behaviour to those events.
 
 > Your behaviour is an addition to the default behaviour implemented by SOOMLA. You don't replace SOOMLA's behaviour.
 
 In order to create your event handler:
 
-1. Create a class that implements IStoreEventHandler (see [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).
-2. Add the created class to StoreEventHandlers:
+1. Create a class that implements _IStoreEventHandler_ (see [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).
+2. Add the created class to _StoreEventHandlers_:
  `StoreEventHandlers.AddEventHandler(new YourEventHandler());`
 
 Contribution
