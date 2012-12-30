@@ -69,10 +69,76 @@ Getting Started (with debug & release)
     StoreController.storeClosing();
     ```
     
-> Don't forget to make these calls. StoreController has to know that you opened/closed your in-app purchase store. Just to make it clear: the in-app purchase store is where you sell virtual goods (and not Google Play or App Store).
+    > Don't forget to make these calls. StoreController has to know that you opened/closed your in-app purchase store. Just to make it clear: the in-app purchase store is where you sell virtual goods (and not Google Play or App Store).
 
 6. You'll need an event handler in order to be notified about in-app purchasing related events. refer to the [Event Handling]() section for more information.
 
 And that's it ! You have storage and in-app purchasing capabilities... ALL-IN-ONE.
+
+What's next? In App Purchasing.
+---
+
+unity3d-store provides you with VirtualCurrencyPacks. VirtualCurrencyPack is a representation of a "bag" of currencies that you want to let your users purchase in Google Play or App Store. You define VirtualCurrencyPacks in your game specific assets file which is your implemetation of IStoreAssets ([example](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/MuffinRushAssets.cs)). After you do that you can call StoreController to make actual purchases and unity3d-store will take care of the rest.
+
+Example:
+
+Lets say you have a VirtualCurrencyPack you call `TEN_COINS_PACK` and a VirtualCurrency you call `COIN_CURRENCY`:
+
+
+```cs
+VirtualCurrencyPack TEN_COINS_PACK = new VirtualCurrencyPack(
+        "10 Coins",                // name
+        "A pack of 10 coins",      // description
+        "10_coins",                // item id
+        "com.soomla.ten_coin_pack",// product id in Google Market AND App Store !
+        1.99,                      // actual price in $$
+        10,                        // number of currencies in the pack
+        COIN_CURRENCY);            // the associated currency
+```
+     
+Now you can use StoreController to call Google Play or the App Store's in-app purchasing mechanism:
+
+```cs
+StoreController.BuyCurrencyPack(TEN_COINS_PACK.MarketItem.ProductId);
+```
+    
+And that's it! unity3d-store knows how to contact Google Play or the App Store for you and redirect the user to the purchasing mechanism.
+Don't forget to define your IStoreEventHandler in order to get the events of successful or failed purchases (see [Event Handling](https://github.com/soomla/unity3d-store#event-handling)).
+
+Storage & Meta-Data
+---
+
+When you initialize StoreController, it automatically initializes two other classes: StoreInventory and StoreInfo.   
+- StoreInventory is a convinience class to let you perform operations on VirtualCurrencies and VirtualGoods. Use it to fetch/change the balances of VirtualItems in your game (using their ItemIds!)
+- StoreInfo is where all meta data information about your specific game can be retrieved. It is initialized with your implementation of IStoreAssets and you can use it to retrieve information about your specific game.
+**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you shoule make as little calls as possible to StoreInfo. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to StoreInfo. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleLocalStoreInfo.cs))**
+
+The on-device storage is encrypted and kept in a SQLite database. SOOMLA is preparing a cloud-based storage service that'll allow this SQLite to be synced to a cloud-based repository that you'll define.
+
+**Example Usages**
+
+* Add 10 coins to the virtual currency with itemId "currency_coin":
+
+    ```Java
+    VirtualCurrency coin = StoreInfo.getVirtualCurrencyByItemId("currency_coin");
+    StorageManager.getVirtualCurrencyStorage().add(coin, 10);
+    ```
+    
+* Remove 10 virtual goods with itemId "green_hat":
+
+    ```Java
+    VirtualGood greenHat = StoreInfo.getVirtualGoodByItemId("green_hat");
+    StorageManager.getVirtualGoodsStorage().remove(greenHat, 10);
+    ```
+    
+* Get the current balance of green hats (virtual goods with itemId "green_hat"):
+
+    ```Java
+    VirtualGood greenHat = StoreInfo.getVirtualGoodByItemId("green_hat");
+    int greenHatsBalance = StorageManager.getVirtualGoodsStorage().getBalance(greenHat);
+    ```
+
+
+
 
 
