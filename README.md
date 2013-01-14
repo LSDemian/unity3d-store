@@ -148,11 +148,17 @@ SOOMLA lets you create your own event handler and add it to _StoreEventHandlers_
 
 > Your behaviour is an addition to the default behaviour implemented by SOOMLA. You don't replace SOOMLA's behaviour.
 
-In order to create your event handler:
+The 'Events' class is where all event go through. To handle various events, just add your specific behaviour to the delegates in the Events class.
 
-1. Create a class that implements _IStoreEventHandler_ (see [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).
-2. Add the created class to _StoreEventHandlers_:
- `StoreEventHandlers.AddEventHandler(new YourEventHandler());`
+For example, if you want to 'listen' to a MerketPurchase event:
+
+    ```cs
+    Events.OnMarketPurchase += onMarketPurchase;
+    
+    public void onMarketPurchase(MarketItem marketItem) {
+        Debug.Log("Going to purchase an item with productId: " + marketItem.ProductId);
+    }
+    ```
 
 Contribution
 ---
