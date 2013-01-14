@@ -12,6 +12,8 @@
 #import "InsufficientFundsException.h"
 #import "UnityCommons.h"
 #import "StoreConfig.h"
+#import "NonConsumableItem.h"
+#import "PriceModel.h"
 
 UnityStoreAssets * storeAssets;
 UnityStoreEventDispatcher * storeEventDispatcher;
@@ -23,9 +25,14 @@ extern "C"{
 		storeAssets = [[UnityStoreAssets alloc] init];
 	}
 	
-	void storeAssets_AddCategory(const char* name, int id){
+	void storeAssets_SetVersion(int version){
+		[storeAssets setVersion:version];
+	}
+	
+	void storeAssets_AddCategory(const char* name, int id, const char* equipping){
 		NSMutableArray * virtualCategories = (NSMutableArray*)[storeAssets virtualCategories];
-		[virtualCategories addObject:[[VirtualCategory alloc] initWithName:[NSString stringWithUTF8String:name] andId:id]];
+		EquippingModel equippingModel = [VirtualCategory equippingModelStringToEnum:[NSString stringWithUTF8String:equipping]];
+		[virtualCategories addObject:[[VirtualCategory alloc] initWithName:[NSString stringWithUTF8String:name] andId:id andEquippingModel:equippingModel]];
 	}
 	
 	void storeAssets_AddCurrency(const char* name, const char* description, const char* itemID){
@@ -47,7 +54,7 @@ extern "C"{
 		[virtualCurrencyPacks addObject:[[VirtualCurrencyPack alloc] initWithName:[NSString stringWithUTF8String:name] andDescription:[NSString stringWithUTF8String:description] andItemId:[NSString stringWithUTF8String:itemID] andPrice:price andProductId:[NSString stringWithUTF8String:productID] andCurrencyAmount:currencyAmount andCurrency:virtualCurrency]];
 	}
 	
-	void storeAssets_AddVirtualGood(const char* name, const char* description, const char* itemID,int categoryIndex, bool equipStatus, const char* priceModelJSON){
+	void storeAssets_AddVirtualGood(const char* name, const char* description, const char* itemID,int categoryIndex, const char* priceModelJSON){
 		NSDictionary* dict = [[NSString stringWithUTF8String:priceModelJSON] objectFromJSONString];
 		PriceModel * priceModel = [PriceModel priceModelWithNSDictionary:dict];
 		NSMutableArray * virtualCategories = (NSMutableArray*)[storeAssets virtualCategories];
@@ -59,12 +66,12 @@ extern "C"{
 			}
 		}
 		NSMutableArray * virtualGoods = (NSMutableArray*)[storeAssets virtualGoods];
-		[virtualGoods addObject:[[VirtualGood alloc] initWithName:[NSString stringWithUTF8String:name] andDescription:[NSString stringWithUTF8String:description] andItemId:[NSString stringWithUTF8String:itemID] andPriceModel:priceModel andCategory:virtualCategory andEquipStatus:equipStatus]];
+		[virtualGoods addObject:[[VirtualGood alloc] initWithName:[NSString stringWithUTF8String:name] andDescription:[NSString stringWithUTF8String:description] andItemId:[NSString stringWithUTF8String:itemID] andPriceModel:priceModel andCategory:virtualCategory]];
 	}
 	
-	void storeAssets_AddNonConsumable(const char* productId) {
-		NSMutableArray * appStoreNonConsumableItems = (NSMutableArray*)[storeAssets appStoreNonConsumableItems];
-		[appStoreNonConsumableItems addObject:[[AppStoreItem alloc] initWithProductId:[NSString stringWithUTF8String:productId] andConsumable:kNonConsumable]];
+	void storeAssets_AddNonConsumable(const char* name, const char* description, const char* itemID, double price, const char* productID) {
+		NSMutableArray * nonConsumableItems = (NSMutableArray*)[storeAssets nonConsumableItems];
+		[nonConsumableItems addObject:[[NonConsumableItem alloc] initWithName:[NSString stringWithUTF8String:name] andDescription:[NSString stringWithUTF8String:description] andItemId:[NSString stringWithUTF8String:itemID] andPrice:price andProductId:[NSString stringWithUTF8String:productID]]];
 	}
     
     void storeController_SetSoomSec(const char* soomSec) {
@@ -79,9 +86,9 @@ extern "C"{
         storeEventDispatcher = [[UnityStoreEventDispatcher alloc] init];
 	}
 	
-	int storeController_BuyCurrencyPack(const char* productId) {
+	int storeController_BuyMarketItem(const char* productId) {
 		@try {
-			[[StoreController getInstance] buyCurrencyPackWithProcuctId:[NSString stringWithUTF8String:productId]];
+			[[StoreController getInstance] buyAppStoreItemWithProcuctId:[NSString stringWithUTF8String:productId]];
 		} 
 		
         @catch (VirtualItemNotFoundException *e) {
@@ -104,19 +111,6 @@ extern "C"{
 		
         @catch (VirtualItemNotFoundException *e) {
             NSLog(@"Couldn't find a VirtualCurrencyPack with itemId: %@. Purchase is cancelled.", [NSString stringWithUTF8String:itemId]);
-			return EXCEPTION_ITEM_NOT_FOUND;
-        }
-		
-		return NO_ERR;
-	}
-	
-	int storeController_BuyNonConsumableItem(const char* productId) {
-		@try {
-			[[StoreController getInstance] buyNonConsumableItem:[NSString stringWithUTF8String:productId]];
-		} 
-		
-        @catch (VirtualItemNotFoundException *e) {
-            NSLog(@"Couldn't find a AppStoreItem with productId: %@. Purchase is cancelled.", [NSString stringWithUTF8String:productId]);
 			return EXCEPTION_ITEM_NOT_FOUND;
         }
 		

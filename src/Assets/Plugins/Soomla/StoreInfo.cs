@@ -39,74 +39,111 @@ namespace com.soomla.unity
 		[DllImport ("__Internal")]
 		private static extern int storeInfo_GetVirtualCategories(out IntPtr json);
 		[DllImport ("__Internal")]
+		private static extern void storeAssets_SetVersion(int version);
+		[DllImport ("__Internal")]
 		private static extern void storeAssets_Init();
 		[DllImport ("__Internal")]
-		private static extern void storeAssets_AddCategory(string name, int id);
+		private static extern void storeAssets_AddCategory(string name, int id, string equipping);
 		[DllImport ("__Internal")]
 		private static extern void storeAssets_AddCurrency(string name, string description, string itemID);
 		[DllImport ("__Internal")]
 		private static extern void storeAssets_AddCurrencyPack(string name, string description, string itemID, double price, string productID, int currencyAmount, string currencyItemId);
 		[DllImport ("__Internal")]
-		private static extern void storeAssets_AddVirtualGood(string name, string description, string itemID, int categoryIndex, bool equipStatus, string priceModelJSON);
+		private static extern void storeAssets_AddVirtualGood(string name, string description, string itemID, int categoryIndex, string priceModelJSON);
 		[DllImport ("__Internal")]
-		private static extern void storeAssets_AddNonConsumable(string productId);
+		private static extern void storeAssets_AddNonConsumable(string name, string description, string itemID, double price, string productID);
 #endif
 		
 #if UNITY_ANDROID
-		private static AndroidJavaClass jniStoreInfo = new AndroidJavaClass("com.soomla.unity.StoreInfo");
+//		private static AndroidJavaClass jniStoreInfo = new AndroidJavaClass("com.soomla.unity.StoreInfo");
 #endif
 			
 		public static void Initialize(IStoreAssets storeAssets) {
 #if UNITY_ANDROID
 			Debug.Log("pushing data to StoreAssets on java side");
 			
-			AndroidJavaClass jniStoreAssets = new AndroidJavaClass("com.soomla.unity.StoreAssets");
+			AndroidJNI.PushLocalFrame(100);
 			
-			//virtual categories
-			AndroidJavaObject jniVirtualCategories = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualCategories");
-			jniVirtualCategories.Call("clear");
-			Dictionary<int, AndroidJavaObject> jniCategories = new Dictionary<int, AndroidJavaObject>();
-			foreach(VirtualCategory vc in storeAssets.GetVirtualCategories()){
-				jniCategories[vc.Id] = vc.toAndroidJavaObject();
-				jniVirtualCategories.Call<bool>("add", jniCategories[vc.Id]);
-			}
-			//google market items
-			AndroidJavaObject jniGoogleManagedItems = jniStoreAssets.GetStatic<AndroidJavaObject>("googleManagedItems");
-			jniGoogleManagedItems.Call("clear");
-			foreach(MarketItem mi in storeAssets.GetNonConsumableItems()){
-				jniGoogleManagedItems.Call<bool>("add", mi.toAndroidJavaObject(jniStoreAssets));
-			}
-			//Virtual currencies
-			AndroidJavaObject jniVirtualCurrencies = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualCurrencies");
-			Dictionary<string, AndroidJavaObject> jniCurrencies = new Dictionary<string, AndroidJavaObject>();
-			foreach(VirtualCurrency vc in storeAssets.GetVirtualCurrencies()){
-				jniCurrencies[vc.ItemId] = vc.toAndroidJavaObject();
-				jniVirtualCurrencies.Call<bool>("add", jniCurrencies[vc.ItemId]);
-			}
-			//Virtual currency packs
-			AndroidJavaObject jniVirtualCurrencyPacks = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualCurrencyPacks");
-			foreach(VirtualCurrencyPack vcp in storeAssets.GetVirtualCurrencyPacks()){
-				jniVirtualCurrencyPacks.Call<bool>("add", vcp.toAndroidJavaObject(jniCurrencies[vcp.Currency.ItemId]));
-			}
-			//Virtual goods
-			AndroidJavaObject jniVirtualGoods = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualGoods");
-			foreach(VirtualGood vg in storeAssets.GetVirtualGoods()){
-				jniVirtualGoods.Call<bool>("add", vg.toAndroidJavaObject(jniStoreAssets, jniCategories[vg.Category.Id]));
+			using(AndroidJavaClass jniStoreAssets = new AndroidJavaClass("com.soomla.unity.StoreAssets")) {
+			
+				//storeAssets version
+				jniStoreAssets.CallStatic("setVersion", storeAssets.GetVersion());
+				
+				Dictionary<int, AndroidJavaObject> jniCategories = new Dictionary<int, AndroidJavaObject>();
+				//virtual categories
+				using(AndroidJavaObject jniVirtualCategories = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualCategories")) {
+					jniVirtualCategories.Call("clear");
+					foreach(VirtualCategory vc in storeAssets.GetVirtualCategories()){
+						jniCategories[vc.Id] = vc.toAndroidJavaObject(jniStoreAssets);
+						jniVirtualCategories.Call<bool>("add", jniCategories[vc.Id]);
+					}
+				}
+
+				//non consumable items
+				using(AndroidJavaObject jniNonConsumableItems = jniStoreAssets.GetStatic<AndroidJavaObject>("nonConsumableItems")) {
+					jniNonConsumableItems.Call("clear");
+					foreach(NonConsumableItem non in storeAssets.GetNonConsumableItems()){
+						using(AndroidJavaObject obj = non.toAndroidJavaObject()) {
+							jniNonConsumableItems.Call<bool>("add", obj);
+						}
+					}
+				}
+				
+				Dictionary<string, AndroidJavaObject> jniCurrencies = new Dictionary<string, AndroidJavaObject>();
+				//Virtual currencies
+				using(AndroidJavaObject jniVirtualCurrencies = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualCurrencies")) {
+					jniVirtualCurrencies.Call("clear");
+					foreach(VirtualCurrency vc in storeAssets.GetVirtualCurrencies()){
+						jniCurrencies[vc.ItemId] = vc.toAndroidJavaObject();
+						jniVirtualCurrencies.Call<bool>("add", jniCurrencies[vc.ItemId]);
+					}
+				}
+				
+				//Virtual currency packs
+				using(AndroidJavaObject jniVirtualCurrencyPacks = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualCurrencyPacks")) {
+					jniVirtualCurrencyPacks.Call("clear");
+					foreach(VirtualCurrencyPack vcp in storeAssets.GetVirtualCurrencyPacks()){
+						using(AndroidJavaObject obj = vcp.toAndroidJavaObject(jniCurrencies[vcp.Currency.ItemId])) {
+							jniVirtualCurrencyPacks.Call<bool>("add", obj);
+						}
+					}
+				}
+
+				//Virtual goods
+				using(AndroidJavaObject jniVirtualGoods = jniStoreAssets.GetStatic<AndroidJavaObject>("virtualGoods")) {
+					jniVirtualGoods.Call("clear");
+					foreach(VirtualGood vg in storeAssets.GetVirtualGoods()){
+						using(AndroidJavaObject obj = vg.toAndroidJavaObject(jniStoreAssets, jniCategories[vg.Category.Id])) {
+							jniVirtualGoods.Call<bool>("add", obj);
+						}
+					}
+				}
+				
+				foreach(KeyValuePair<int, AndroidJavaObject> kvp in jniCategories) {
+					kvp.Value.Dispose();
+				}
+				
+				foreach(KeyValuePair<string, AndroidJavaObject> kvp in jniCurrencies) {
+					kvp.Value.Dispose();
+				}
 			}
 			
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 			Debug.Log("done! (pushing data to StoreAssets on java side)");
 #elif UNITY_IOS
 			Debug.Log("pushing data to StoreAssets on ios side");
 			
 			storeAssets_Init();
 			
+			// storeAssets version
+			storeAssets_SetVersion(storeAssets.GetVersion());
 			//virtual categories
 			foreach(VirtualCategory vc in storeAssets.GetVirtualCategories()){
-				storeAssets_AddCategory(vc.Name, vc.Id);
+				storeAssets_AddCategory(vc.Name, vc.Id, vc.Equipping.ToString());
 			}
 			//ios market items
-			foreach(MarketItem mi in storeAssets.GetNonConsumableItems()){
-				storeAssets_AddNonConsumable(mi.ProductId);
+			foreach(NonConsumableItem non in storeAssets.GetNonConsumableItems()){
+				storeAssets_AddNonConsumable(non.Name, non.Description, non.ItemId, non.MarketItem.Price, non.MarketItem.ProductId);
 			}
 			//Virtual currencies
 			foreach(VirtualCurrency vc in storeAssets.GetVirtualCurrencies()){
@@ -114,26 +151,30 @@ namespace com.soomla.unity
 			}
 			//Virtual currency packs
 			foreach(VirtualCurrencyPack vcp in storeAssets.GetVirtualCurrencyPacks()){
-				storeAssets_AddCurrencyPack(vcp.Name, vcp.Description, vcp.ItemId, vcp.Price, vcp.MarketItem.ProductId, vcp.CurrencyAmount, vcp.Currency.ItemId);
+				storeAssets_AddCurrencyPack(vcp.Name, vcp.Description, vcp.ItemId, vcp.MarketItem.Price, vcp.MarketItem.ProductId, vcp.CurrencyAmount, vcp.Currency.ItemId);
 			}
 			//Virtual goods
 			foreach(VirtualGood vg in storeAssets.GetVirtualGoods()){
 				string json = vg.PriceModel.toJSONObject().print();
-				storeAssets_AddVirtualGood(vg.Name, vg.Description, vg.ItemId, vg.Category.Id, vg.Equiped, json);
+				storeAssets_AddVirtualGood(vg.Name, vg.Description, vg.ItemId, vg.Category.Id, json);
 			}
 			
 			Debug.Log("done! (pushing data to StoreAssets on ios side)");
 #endif
 		}
 		
-		public static List<MarketItem> GetNonConsumableItems() {
-			List<MarketItem> nonConsumableItems = new List<MarketItem>();
+		public static List<NonConsumableItem> GetNonConsumableItems() {
+			List<NonConsumableItem> nonConsumableItems = new List<NonConsumableItem>();
 #if UNITY_ANDROID
-			AndroidJavaObject jniGoogleManagedItems = jniStoreInfo.CallStatic<AndroidJavaObject>("getGoogleManagedItems");
-			for(int i=0; i<jniGoogleManagedItems.Call<int>("size"); i++) {
-				AndroidJavaObject jniGmi = jniGoogleManagedItems.Call<AndroidJavaObject>("get", i);
-				nonConsumableItems.Add(new MarketItem(jniGmi));
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniNonConsumableItems = new AndroidJavaClass("com.soomla.unity.StoreInfo").CallStatic<AndroidJavaObject>("getNonConsumableItems")) {
+				for(int i=0; i<jniNonConsumableItems.Call<int>("size"); i++) {
+					using(AndroidJavaObject jniNon = jniNonConsumableItems.Call<AndroidJavaObject>("get", i)) {
+						nonConsumableItems.Add(new NonConsumableItem(jniNon));
+					}
+				}
 			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetNonConsumableItems(out p);
@@ -145,7 +186,7 @@ namespace com.soomla.unity
 			
 			JSONObject nonConsArr = new JSONObject(nonConsumableJson);
 			foreach(JSONObject obj in nonConsArr.list) {
-				nonConsumableItems.Add(new MarketItem(obj));
+				nonConsumableItems.Add(new NonConsumableItem(obj));
 			}
 #endif
 			return nonConsumableItems;
@@ -154,11 +195,15 @@ namespace com.soomla.unity
 		public static List<VirtualCategory> GetVirtualCategories() {
 			List<VirtualCategory> virtualCategories = new List<VirtualCategory>();
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCategories = jniStoreInfo.CallStatic<AndroidJavaObject>("getVirtualCategories");
-			for(int i=0; i<jniVirtualCategories.Call<int>("size"); i++) {
-				AndroidJavaObject jniCat = jniVirtualCategories.Call<AndroidJavaObject>("get", i);
-				virtualCategories.Add(new VirtualCategory(jniCat));
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCategories = new AndroidJavaClass("com.soomla.unity.StoreInfo").CallStatic<AndroidJavaObject>("getVirtualCategories")) {
+				for(int i=0; i<jniVirtualCategories.Call<int>("size"); i++) {
+					using(AndroidJavaObject jniCat = jniVirtualCategories.Call<AndroidJavaObject>("get", i)) {
+						virtualCategories.Add(new VirtualCategory(jniCat));
+					}
+				}
 			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetVirtualCategories(out p);
@@ -179,11 +224,15 @@ namespace com.soomla.unity
 		public static List<VirtualGood> GetVirtualGoods() {
 			List<VirtualGood> virtualGoods = new List<VirtualGood>();
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualGoods = jniStoreInfo.CallStatic<AndroidJavaObject>("getVirtualGoods");
-			for(int i=0; i<jniVirtualGoods.Call<int>("size"); i++) {
-				AndroidJavaObject jniGood = jniVirtualGoods.Call<AndroidJavaObject>("get", i);
-				virtualGoods.Add(new VirtualGood(jniGood));
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualGoods = new AndroidJavaClass("com.soomla.unity.StoreInfo").CallStatic<AndroidJavaObject>("getVirtualGoods")) {
+				for(int i=0; i<jniVirtualGoods.Call<int>("size"); i++) {
+					using(AndroidJavaObject jniGood = jniVirtualGoods.Call<AndroidJavaObject>("get", i)) {
+						virtualGoods.Add(new VirtualGood(jniGood));
+					}
+				}
 			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetVirtualGoods(out p);
@@ -204,11 +253,15 @@ namespace com.soomla.unity
 		public static List<VirtualCurrencyPack> GetVirtualCurrencyPacks() {
 			List<VirtualCurrencyPack> vcps = new List<VirtualCurrencyPack>();
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCurrencyPacks = jniStoreInfo.CallStatic<AndroidJavaObject>("getCurrencyPacks");
-			for(int i=0; i<jniVirtualCurrencyPacks.Call<int>("size"); i++) {
-				AndroidJavaObject jnivcp = jniVirtualCurrencyPacks.Call<AndroidJavaObject>("get", i);
-				vcps.Add(new VirtualCurrencyPack(jnivcp));
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCurrencyPacks = new AndroidJavaClass("com.soomla.unity.StoreInfo").CallStatic<AndroidJavaObject>("getCurrencyPacks")) {
+				for(int i=0; i<jniVirtualCurrencyPacks.Call<int>("size"); i++) {
+					using(AndroidJavaObject jnivcp = jniVirtualCurrencyPacks.Call<AndroidJavaObject>("get", i)) {
+						vcps.Add(new VirtualCurrencyPack(jnivcp));
+					}
+				}
 			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetVirtualCurrencyPacks(out p);
@@ -229,11 +282,15 @@ namespace com.soomla.unity
 		public static List<VirtualCurrency> GetVirtualCurrencies() {
 			List<VirtualCurrency> vcs = new List<VirtualCurrency>();
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCurrencies = jniStoreInfo.CallStatic<AndroidJavaObject>("getVirtualCurrencies");
-			for(int i=0; i<jniVirtualCurrencies.Call<int>("size"); i++) {
-				AndroidJavaObject jnivc = jniVirtualCurrencies.Call<AndroidJavaObject>("get", i);
-				vcs.Add(new VirtualCurrency(jnivc));
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCurrencies = new AndroidJavaClass("com.soomla.unity.StoreInfo").CallStatic<AndroidJavaObject>("getVirtualCurrencies")) {
+				for(int i=0; i<jniVirtualCurrencies.Call<int>("size"); i++) {
+					using(AndroidJavaObject jnivc = jniVirtualCurrencies.Call<AndroidJavaObject>("get", i)) {
+						vcs.Add(new VirtualCurrency(jnivc));
+					}
+				}
 			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetVirtualCurrencies(out p);
@@ -251,11 +308,16 @@ namespace com.soomla.unity
 			return vcs;
 		}
 
-		public static MarketItem GetNonConsumableItemByProductId(string productId) {
+		public static NonConsumableItem GetNonConsumableItemByProductId(string productId) {
 #if UNITY_ANDROID
-			AndroidJavaObject jniGoogleManagedItem = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
-				jniStoreInfo, "getGoogleManagedItemByProductId", productId);
-			return new MarketItem(jniGoogleManagedItem);
+			NonConsumableItem non = null;
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniNonConsumableItem = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
+				new AndroidJavaClass("com.soomla.unity.StoreInfo"), "getNonConsumableByProductId", productId)) {
+				non = new NonConsumableItem(jniNonConsumableItem);
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
+			return non;
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetNonConsumableByProductId(productId, out p);
@@ -266,15 +328,22 @@ namespace com.soomla.unity
 			Marshal.FreeHGlobal(p);
 			
 			JSONObject obj = new JSONObject(nonConsJson);
-			return new MarketItem(obj);
+			return new NonConsumableItem(obj);
+#else
+			return null;
 #endif
 		}
 		
 		public static VirtualCurrency GetVirtualCurrencyByItemId(string itemId) {
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCurrency = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
-				jniStoreInfo,"getVirtualCurrencyByItemId", itemId);
-			return new VirtualCurrency(jniVirtualCurrency);
+			VirtualCurrency vc = null;
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCurrency = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
+				new AndroidJavaClass("com.soomla.unity.StoreInfo"),"getVirtualCurrencyByItemId", itemId)) {
+				vc = new VirtualCurrency(jniVirtualCurrency);
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
+			return vc;
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetCurrencyByItemId(itemId, out p);
@@ -286,14 +355,21 @@ namespace com.soomla.unity
 			
 			JSONObject obj = new JSONObject(json);
 			return new VirtualCurrency(obj);
+#else
+			return null;
 #endif
 		}
 		
 		public static VirtualGood GetVirtualGoodByItemId(string itemId) {
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualGood = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
-				jniStoreInfo,"getVirtualGoodByItemId", itemId);
-			return new VirtualGood(jniVirtualGood);	
+			VirtualGood vg = null;
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualGood = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
+				new AndroidJavaClass("com.soomla.unity.StoreInfo"),"getVirtualGoodByItemId", itemId)) {
+				vg = new VirtualGood(jniVirtualGood);	
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
+			return vg;
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetGoodByItemId(itemId, out p);
@@ -305,15 +381,22 @@ namespace com.soomla.unity
 			
 			JSONObject obj = new JSONObject(json);
 			return new VirtualGood(obj);
+#else
+			return null;
 #endif
 		}
 		
 		public static VirtualCurrencyPack GetPackByItemId(string itemId) {
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCurrencyPack = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
-				jniStoreInfo,"getPackByItemId", itemId);
+			VirtualCurrencyPack vcp = null;
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCurrencyPack = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
+				new AndroidJavaClass("com.soomla.unity.StoreInfo"),"getPackByItemId", itemId)) {
 			
-			return new VirtualCurrencyPack(jniVirtualCurrencyPack);
+				vcp = new VirtualCurrencyPack(jniVirtualCurrencyPack);
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
+			return vcp;
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetCurrencyPackByItemId(itemId, out p);
@@ -325,14 +408,20 @@ namespace com.soomla.unity
 			
 			JSONObject obj = new JSONObject(json);
 			return new VirtualCurrencyPack(obj);
+#else
+			return null;
 #endif
 		}
 		
 		public static VirtualCurrencyPack GetPackByProductId(string productId) {
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCurrencyPack = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
-				jniStoreInfo,"getPackByGoogleProductId", productId);
-			return new VirtualCurrencyPack(jniVirtualCurrencyPack);
+			VirtualCurrencyPack vcp = null;
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCurrencyPack = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
+				new AndroidJavaClass("com.soomla.unity.StoreInfo"),"getPackByGoogleProductId", productId)) {
+				vcp = new VirtualCurrencyPack(jniVirtualCurrencyPack);
+			}
+			return vcp;
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetCurrencyPackByProductId(productId, out p);
@@ -344,14 +433,21 @@ namespace com.soomla.unity
 			
 			JSONObject obj = new JSONObject(json);
 			return new VirtualCurrencyPack(obj);
+#else
+			return null;
 #endif
 		}
 		
 		public static VirtualCategory GetVirtualCategoryById(int id) {
 #if UNITY_ANDROID
-			AndroidJavaObject jniVirtualCategory = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
-				jniStoreInfo,"getVirtualCategoryById", id);
-			return new VirtualCategory(jniVirtualCategory);
+			VirtualCategory vc = null;
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniVirtualCategory = AndroidJNIHandler.CallStatic<AndroidJavaObject>(
+				new AndroidJavaClass("com.soomla.unity.StoreInfo"),"getVirtualCategoryById", id)) {
+				vc = new VirtualCategory(jniVirtualCategory);
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
+			return vc;
 #elif UNITY_IOS
 			IntPtr p = IntPtr.Zero;
 			int err = storeInfo_GetCategoryById(id, out p);
@@ -363,6 +459,8 @@ namespace com.soomla.unity
 			
 			JSONObject obj = new JSONObject(json);
 			return new VirtualCategory(obj);
+#else
+			return null;
 #endif
 		}
 	}

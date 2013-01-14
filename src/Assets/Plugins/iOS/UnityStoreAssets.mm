@@ -12,6 +12,7 @@
 - (id)init{
 	self = [super init];
 	if(self){
+		version = 0;
 		virtualCurrenciesArray = [[NSMutableArray alloc] init];
 		virtualGoodsArray = [[NSMutableArray alloc] init];
 		virtualCurrencyPacksArray = [[NSMutableArray alloc] init];
@@ -21,6 +22,14 @@
 	}
 	return self;
 }		
+
+- (int)getVersion{
+	return version;
+}
+
+- (void)setVersion:(int)oVersion{
+	version = oVersion;
+}
 
 - (NSArray*)virtualCurrencies{
     return virtualCurrenciesArray;
@@ -38,7 +47,7 @@
     return virtualCategoriesArray;
 }
 
-- (NSArray*)appStoreNonConsumableItems {
+- (NSArray*)nonConsumableItems {
     return nonConsumablesArray;
 }
 

@@ -16,7 +16,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class AppStoreItem;
+@class NonConsumableItem;
 
 /**
  * This class provide basic storage operations on the App Store's Non-Consumable items.
@@ -27,17 +27,17 @@
  * Figure out if the given Non-Consumable AppStoreItem exists.
  * appStoreItem is the required Non-Consumable AppStoreItem.
  */
-- (BOOL)nonConsumableExists:(AppStoreItem*)appStoreItem;
+- (BOOL)nonConsumableExists:(NonConsumableItem*)appStoreItem;
 /**
  * Adds the given App Store Non-Consumable item to the storage.
  * appStoreItem is the required App Store Non-Consumable item.
  */
-- (void)add:(AppStoreItem*)appStoreItem;
+- (void)add:(NonConsumableItem*)appStoreItem;
 /**
  * Removes the given App Store Non-Consumable item from the storage.
  * appStoreItem is the required App Store Non-Consumable item.
  */
-- (void)remove:(AppStoreItem*)appStoreItem;
+- (void)remove:(NonConsumableItem*)appStoreItem;
 
 
 @end

@@ -12,15 +12,13 @@ namespace com.soomla.unity{
 	/// </summary>
 	public class VirtualCurrencyPack : AbstractVirtualItem{
 		public MarketItem MarketItem;
-		public double Price;
 		public int CurrencyAmount;
 		public VirtualCurrency Currency;
 		
 		public VirtualCurrencyPack(string name, string description, string itemId, string productId, double price, int currencyAmount, VirtualCurrency currency)
 			: base(name, description, itemId)
 		{
-			this.MarketItem = new MarketItem(productId, MarketItem.Consumable.CONSUMABLE);
-			this.Price = price;
+			this.MarketItem = new MarketItem(productId, MarketItem.Consumable.CONSUMABLE, price);
 			this.CurrencyAmount = currencyAmount;
 			this.Currency = currency;
 		}
@@ -29,10 +27,9 @@ namespace com.soomla.unity{
 		public VirtualCurrencyPack(AndroidJavaObject jniVirtualCurrencyPack) 
 			: base(jniVirtualCurrencyPack)
 		{
-			this.Price = jniVirtualCurrencyPack.Call<double>("getPrice");
 			this.CurrencyAmount = jniVirtualCurrencyPack.Call<int>("getCurrencyAmount");
 			// Google Market Item
-			AndroidJavaObject jniGoogleMarketItem = jniVirtualCurrencyPack.Call<AndroidJavaObject>("getmGoogleItem");
+			AndroidJavaObject jniGoogleMarketItem = jniVirtualCurrencyPack.Call<AndroidJavaObject>("getGoogleItem");
 			this.MarketItem = new MarketItem(jniGoogleMarketItem);
 			// Virtual Currency
 			AndroidJavaObject jniVirtualCurrency = jniVirtualCurrencyPack.Call<AndroidJavaObject>("getVirtualCurrency");
@@ -41,16 +38,14 @@ namespace com.soomla.unity{
 		
 		public AndroidJavaObject toAndroidJavaObject(AndroidJavaObject jniVirtualCurrency) {
 			return new AndroidJavaObject("com.soomla.store.domain.data.VirtualCurrencyPack", this.Name, this.Description, 
-				this.ItemId, this.MarketItem.ProductId, this.Price, this.CurrencyAmount, jniVirtualCurrency);
+				this.ItemId, this.MarketItem.ProductId, this.MarketItem.Price, this.CurrencyAmount, jniVirtualCurrency);
 		}
 #elif UNITY_IOS
 		public VirtualCurrencyPack(JSONObject jsonVcp)
 			: base(jsonVcp)
 		{
-			this.Price = ((JSONObject)jsonVcp[JSONConsts.CURRENCYPACK_PRICE]).n;
 			this.CurrencyAmount = System.Convert.ToInt32(((JSONObject)jsonVcp[JSONConsts.CURRENCYPACK_AMOUNT]).n);
-			string productId = jsonVcp[JSONConsts.CURRENCYPACK_PRODUCT_ID].str;
-			this.MarketItem = new MarketItem(productId, com.soomla.unity.MarketItem.Consumable.CONSUMABLE);
+			this.MarketItem = new MarketItem(jsonVcp);
 			
 			string currencyItemId = jsonVcp[JSONConsts.CURRENCYPACK_CURRENCYITEMID].str;
 			try {
@@ -62,9 +57,12 @@ namespace com.soomla.unity{
 		
 		public override JSONObject toJSONObject() {
 			JSONObject obj = base.toJSONObject();
-			obj.AddField(JSONConsts.CURRENCYPACK_PRICE, (float)this.Price);
+			JSONObject miJson = this.MarketItem.toJSONObject();
+			for(int i=0; i<miJson.list.Count; i++) {
+				string key = (string)miJson.keys[i];
+				obj.AddField(key, miJson[key]);
+			}
 			obj.AddField(JSONConsts.CURRENCYPACK_AMOUNT, this.CurrencyAmount);
-			obj.AddField(JSONConsts.CURRENCYPACK_PRODUCT_ID, this.MarketItem.ProductId);
 			obj.AddField(JSONConsts.CURRENCYPACK_CURRENCYITEMID, this.Currency.ItemId);
 			
 			return obj;

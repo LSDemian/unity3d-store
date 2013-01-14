@@ -3,6 +3,7 @@
 #import "EventHandling.h"
 #import "AppStoreItem.h"
 #import "VirtualGood.h"
+#import "VirtualCurrency.h"
 
 @implementation UnityStoreEventDispatcher
 
@@ -42,6 +43,16 @@
         UnitySendMessage("Soomla", "onOpeningStore", "");
     }  else if ([notification.name isEqualToString:EVENT_GOODS_PURCHASE_STARTED]) {
         UnitySendMessage("Soomla", "onGoodsPurchaseProcessStarted", "");
+    }  else if ([notification.name isEqualToString:EVENT_CHANGED_CURRENCY_BALANCE]) {
+	    NSDictionary* userInfo = [notification userInfo];
+	    VirtualCurrency* vc = [userInfo objectForKey:@"VirtualCurrency"];
+		int balance = [(NSNumber*)[userInfo objectForKey:@"balance"] intValue];
+        UnitySendMessage("Soomla", "onCurrencyBalanceChanged", [[NSString stringWithFormat:@"%@#SOOM#%d", vc.itemId, balance] UTF8String]);
+    }  else if ([notification.name isEqualToString:EVENT_CHANGED_GOOD_BALANCE]) {
+	    NSDictionary* userInfo = [notification userInfo];
+	    VirtualGood* vg = [userInfo objectForKey:@"VirtualGood"];
+		int balance = [(NSNumber*)[userInfo objectForKey:@"balance"] intValue];
+        UnitySendMessage("Soomla", "onGoodBalanceChanged", [[NSString stringWithFormat:@"%@#SOOM#%d", vg.itemId, balance] UTF8String]);
     }
 }
 

@@ -54,28 +54,33 @@ namespace com.soomla.unity
 		{
 			IntPtr jException = AndroidJNI.ExceptionOccurred();
 			if (jException != IntPtr.Zero) {				
-				AndroidJavaObject exception = new AndroidJavaObject(jException);
-				AndroidJNI.ExceptionClear();
-				
-				AndroidJavaClass jniExceptionClass = new AndroidJavaClass("com.soomla.store.exceptions.InsufficientFundsException");
-				if (AndroidJNI.IsInstanceOf(exception.GetRawObject(), jniExceptionClass.GetRawClass())) {
-					Debug.Log("SOOMLA/UNITY Cought InsufficientFundsException!");
+				using(AndroidJavaObject exception = new AndroidJavaObject(jException)) {
+					AndroidJNI.ExceptionClear();
 					
-					throw new InsufficientFundsException();
-				}
-				
-				jniExceptionClass = new AndroidJavaClass("com.soomla.store.exceptions.VirtualItemNotFoundException");
-				if (AndroidJNI.IsInstanceOf(exception.GetRawObject(), jniExceptionClass.GetRawClass())) {
-					Debug.Log("SOOMLA/UNITY Cought VirtualItemNotFoundException!");
+					AndroidJavaClass jniExceptionClass = new AndroidJavaClass("com.soomla.store.exceptions.InsufficientFundsException");
+					if (AndroidJNI.IsInstanceOf(exception.GetRawObject(), jniExceptionClass.GetRawClass())) {
+						Debug.Log("SOOMLA/UNITY Cought InsufficientFundsException!");
+						
+						throw new InsufficientFundsException();
+					}
 					
-					throw new VirtualItemNotFoundException();
-				}
-				
-				jniExceptionClass = new AndroidJavaClass("com.soomla.store.exceptions.NotEnoughGoodsException");
-				if (AndroidJNI.IsInstanceOf(exception.GetRawObject(), jniExceptionClass.GetRawClass())) {
-					Debug.Log("SOOMLA/UNITY Cought NotEnoughGoodsException!");
+					jniExceptionClass.Dispose();
+					jniExceptionClass = new AndroidJavaClass("com.soomla.store.exceptions.VirtualItemNotFoundException");
+					if (AndroidJNI.IsInstanceOf(exception.GetRawObject(), jniExceptionClass.GetRawClass())) {
+						Debug.Log("SOOMLA/UNITY Cought VirtualItemNotFoundException!");
+						
+						throw new VirtualItemNotFoundException();
+					}
 					
-					throw new NotEnoughGoodsException();
+					jniExceptionClass.Dispose();
+					jniExceptionClass = new AndroidJavaClass("com.soomla.store.exceptions.NotEnoughGoodsException");
+					if (AndroidJNI.IsInstanceOf(exception.GetRawObject(), jniExceptionClass.GetRawClass())) {
+						Debug.Log("SOOMLA/UNITY Cought NotEnoughGoodsException!");
+						
+						throw new NotEnoughGoodsException();
+					}
+					
+					jniExceptionClass.Dispose();
 				}
 				
 				Debug.Log("SOOMLA/UNITY Got an exception but can't identify it!");

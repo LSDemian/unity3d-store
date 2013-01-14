@@ -13,7 +13,7 @@ namespace com.soomla.unity.example
 		private Vector2 productScrollPosition = Vector2.zero;
 		private bool isDragging = false;
 		private Vector2 startTouch = Vector2.zero;
-		private static IStoreEventHandler handler;
+		private static ExampleEventHandler handler;
 		
 		public string fontSuffix = "";
 	
@@ -43,6 +43,7 @@ namespace com.soomla.unity.example
 		void Start () {
 			StoreController.Initialize(new MuffinRushAssets());
 			handler = new ExampleEventHandler();
+			ExampleLocalStoreInfo.Init();
 			
 			// some examples
 			Debug.Log("start currency: " + StoreInventory.GetCurrencyBalance("currency_muffin"));
@@ -53,12 +54,17 @@ namespace com.soomla.unity.example
 		}
 		
 		public static void StoreOpening() {
-			ExampleLocalStoreInfo.Init();
-			StoreEventHandlers.AddEventHandler(handler);	
+			
+			// We have to notify StoreController when the store is going to be shown !
+			StoreController.StoreOpening();
+			
 		}
 		
 		public static void StoreClosing() {
-			StoreEventHandlers.RemoveEventHandler(handler);
+			
+			// We have to notify StoreController when the store is going to be hidden !
+			StoreController.StoreClosing();
+			
 		}
 		
 		public static void OpenWindow(){
@@ -137,7 +143,6 @@ namespace com.soomla.unity.example
 			//drawing button and testing if it has been clicked
 			if(GUI.Button(new Rect(Screen.width*2/6,Screen.height*5f/8f,Screen.width*2/6,Screen.width*2/6),(Texture2D)Resources.Load("SoomlaStore/images/soomla_logo_new"))){
 				guiState = GUIState.GOODS;
-				StoreController.StoreOpening();
 				StoreOpening();
 			}
 			//set alignment to backup
@@ -215,7 +220,6 @@ namespace com.soomla.unity.example
 			float width = buttonHeight*180/95;
 			if(GUI.Button(new Rect(Screen.width*2f/7f-width/2f,Screen.height*7f/8f+borderSize,width,buttonHeight), "back")){
 				guiState = GUIState.WELCOME;
-				StoreController.StoreClosing();
 				StoreClosing();
 			}
 			GUI.DrawTexture(new Rect(Screen.width*2f/7f-width/2f,Screen.height*7f/8f+borderSize,width,buttonHeight),(Texture2D)Resources.Load("SoomlaStore/images/back"));
@@ -259,7 +263,7 @@ namespace com.soomla.unity.example
 				if(GUI.Button(new Rect(0,y,Screen.width,productSize),"") && !isDragging){
 					Debug.Log("SOOMLA/UNITY Wants to buy: " + cp.Name + " productId: " + cp.MarketItem.ProductId);
 					try {
-						StoreController.BuyCurrencyPack(cp.MarketItem.ProductId);
+						StoreController.BuyMarketItem(cp.MarketItem.ProductId);
 					} catch (Exception e) {
 						Debug.Log ("SOOMLA/UNITY " + e.Message);
 					}
@@ -274,7 +278,7 @@ namespace com.soomla.unity.example
 				GUI.Label(new Rect(productSize,y,Screen.width,productSize/3f),cp.Name);
 				GUI.skin.label.font = (Font)Resources.Load("SoomlaStore/Description" + fontSuffix);
 				GUI.Label(new Rect(productSize + 10f,y+productSize/3f,Screen.width-productSize-15f,productSize/3f),cp.Description);
-				GUI.Label(new Rect(Screen.width*3/4f,y+productSize*2/3f,Screen.width,productSize/3f),"price:" + cp.Price);
+				GUI.Label(new Rect(Screen.width*3/4f,y+productSize*2/3f,Screen.width,productSize/3f),"price:" + cp.MarketItem.Price);
 				GUI.skin.label.alignment = TextAnchor.UpperRight;
 				GUI.skin.label.font = (Font)Resources.Load("SoomlaStore/Buy" + fontSuffix);
 				GUI.Label(new Rect(0,y,Screen.width-10,productSize),"Click to buy");

@@ -10,7 +10,7 @@
 #import "VirtualItemNotFoundException.h"
 #import "UnityCommons.h"
 #import "StoreInfo.h"
-#import "AppStoreItem.h"
+#import "NonConsumableItem.h"
 
 char* AutonomousStringCopy (const char* string)
 {
@@ -101,12 +101,12 @@ extern "C"{
 	int storeInfo_GetNonConsumableByProductId(const char* productId, char** json){
         NSString* productIdS = [NSString stringWithUTF8String:productId];
 		@try {
-			AppStoreItem* api = [[StoreInfo getInstance] appStoreNonConsumableItemWithProductId:productIdS];
-			*json = AutonomousStringCopy([[[api toDictionary] JSONString] UTF8String]);
+			NonConsumableItem* non = [[StoreInfo getInstance] nonConsumableItemWithProductId:productIdS];
+			*json = AutonomousStringCopy([[[non toDictionary] JSONString] UTF8String]);
 		}
 		
 		@catch (VirtualItemNotFoundException* e) {
-            NSLog(@"Couldn't find a AppStoreItem with productId: %@.", productIdS);
+            NSLog(@"Couldn't find a NonConsumableItem with productId: %@.", productIdS);
 			return EXCEPTION_ITEM_NOT_FOUND;
         }
 
@@ -156,10 +156,10 @@ extern "C"{
 	}
 	
 	int storeInfo_GetNonConsumableItems(char** json) {
-		NSArray* nonConsumables = [[StoreInfo getInstance] appStoreNonConsumableItems];
+		NSArray* nonConsumables = [[StoreInfo getInstance] nonConsumableItems];
 		NSMutableString* retJson = [[[NSMutableString alloc] initWithString:@"["] autorelease];
-		for(AppStoreItem* asi in nonConsumables) {
-			[retJson appendString:[NSString stringWithFormat:@"%@,", [[asi toDictionary] JSONString]]];
+		for(NonConsumableItem* non in nonConsumables) {
+			[retJson appendString:[NSString stringWithFormat:@"%@,", [[non toDictionary] JSONString]]];
 		}
 		[retJson deleteCharactersInRange:NSMakeRange([retJson length]-1, 1)];
 		[retJson appendString:@"]"];

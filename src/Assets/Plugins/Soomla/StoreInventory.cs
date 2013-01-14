@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using System.Runtime.InteropServices;
 
 namespace com.soomla.unity
@@ -24,20 +25,16 @@ namespace com.soomla.unity
 		private static extern int storeInventory_RemoveGoodAmount(string itemId, int amount, out int outBalance);
 #endif
 		
-#if UNITY_ANDROID
-		private static AndroidJavaClass jniStoreInventory = null;
-#endif
-		
-		public static void Init() {
-#if UNITY_ANDROID
-			jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory");
-#endif
-		}
-		
 		public static int GetCurrencyBalance(string currencyItemId) {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				return jniStoreInventory.CallStatic<int>("getCurrencyBalance", currencyItemId);
+				AndroidJNI.PushLocalFrame(100);
+				int balance = 0;
+				using(AndroidJavaClass jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory")) {
+					balance = jniStoreInventory.CallStatic<int>("getCurrencyBalance", currencyItemId);
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
+				return balance;
 #elif UNITY_IOS
 				Debug.Log("SOOMLA/UNITY Calling GetCurrencyBalance with: " + currencyItemId);
 				int balance = 0;
@@ -54,7 +51,13 @@ namespace com.soomla.unity
 		public static int AddCurrencyAmount(string currencyItemId, int amount) {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				return jniStoreInventory.CallStatic<int>("addCurrencyAmount", currencyItemId, amount);
+				AndroidJNI.PushLocalFrame(100);
+				int balance = 0;
+				using(AndroidJavaClass jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory")) {
+					balance = jniStoreInventory.CallStatic<int>("addCurrencyAmount", currencyItemId, amount);
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
+				return balance;
 #elif UNITY_IOS
 				Debug.Log("SOOMLA/UNITY Calling AddCurrencyAmount with: " + currencyItemId);
 				int balance = 0;
@@ -71,7 +74,13 @@ namespace com.soomla.unity
 		public static int RemoveCurrencyAmount(string currencyItemId, int amount) {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				return jniStoreInventory.CallStatic<int>("removeCurrencyAmount", currencyItemId, amount);
+				int balance = 0;
+				AndroidJNI.PushLocalFrame(100);
+				using(AndroidJavaClass jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory")) {
+					balance = jniStoreInventory.CallStatic<int>("removeCurrencyAmount", currencyItemId, amount);
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
+				return balance;
 #elif UNITY_IOS
 				Debug.Log("SOOMLA/UNITY Calling RemoveCurrencyAmount with: " + currencyItemId);
 				int balance = 0;
@@ -89,7 +98,13 @@ namespace com.soomla.unity
 		public static int GetGoodBalance(string goodItemId) {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				return jniStoreInventory.CallStatic<int>("getGoodBalance", goodItemId);
+				int balance = 0;
+				AndroidJNI.PushLocalFrame(100);
+				using(AndroidJavaClass jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory")) {
+					balance = jniStoreInventory.CallStatic<int>("getGoodBalance", goodItemId);
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
+				return balance;
 #elif UNITY_IOS
 				Debug.Log("SOOMLA/UNITY Calling GetGoodBalance with: " + goodItemId);
 				int balance = 0;
@@ -106,7 +121,13 @@ namespace com.soomla.unity
 		public static int AddGoodAmount(string goodItemId, int amount) {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				return jniStoreInventory.CallStatic<int>("addGoodAmount", goodItemId, amount);
+				int balance = 0;
+				AndroidJNI.PushLocalFrame(100);
+				using(AndroidJavaClass jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory")) {
+					balance = jniStoreInventory.CallStatic<int>("addGoodAmount", goodItemId, amount);
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
+				return balance;
 #elif UNITY_IOS
 				Debug.Log("SOOMLA/UNITY Calling AddGoodAmount with: " + goodItemId);
 				int balance = 0;
@@ -123,7 +144,13 @@ namespace com.soomla.unity
 		public static int RemoveGoodAmount(string goodItemId, int amount) {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				return jniStoreInventory.CallStatic<int>("removeGoodAmount", goodItemId, amount);
+				int balance = 0;
+				AndroidJNI.PushLocalFrame(100);
+				using(AndroidJavaClass jniStoreInventory = new AndroidJavaClass("com.soomla.store.StoreInventory")) {
+					balance = jniStoreInventory.CallStatic<int>("removeGoodAmount", goodItemId, amount);
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
+				return balance;
 #elif UNITY_IOS
 				Debug.Log("SOOMLA/UNITY Calling RemoveGoodAmount with: " + goodItemId);
 				int balance = 0;

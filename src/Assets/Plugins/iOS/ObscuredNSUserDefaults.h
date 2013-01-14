@@ -16,5 +16,7 @@
 + (NSString*)stringForKey:(NSString *)defaultName;
 + (void)setBool:(BOOL)value forKey:(NSString *)defaultName;
 + (void)setString:(NSString*)value forKey:(NSString *)defaultName;
++ (int)intForKey:(NSString *)defaultName;
++ (void)setInt:(int)value forKey:(NSString *)defaultName;
 
 @end

@@ -1,5 +1,7 @@
 using UnityEngine;
+using System;
 using System.Runtime.InteropServices;
+
 
 namespace com.soomla.unity
 {
@@ -12,11 +14,9 @@ namespace com.soomla.unity
 		[DllImport ("__Internal")]
 		private static extern void storeController_Init(string customSecret);
 		[DllImport ("__Internal")]
-		private static extern int storeController_BuyCurrencyPack(string productId);
+		private static extern int storeController_BuyMarketItem(string productId);
 		[DllImport ("__Internal")]
 		private static extern int storeController_BuyVirtualGood(string itemId);
-		[DllImport ("__Internal")]
-		private static extern int storeController_BuyNonConsumableItem(string productId);
 		[DllImport ("__Internal")]
 		private static extern int storeController_EquipVirtualGood(string itemId);
 		[DllImport ("__Internal")]
@@ -31,7 +31,7 @@ namespace com.soomla.unity
 		
 #if UNITY_ANDROID
 		private static AndroidJavaObject jniStoreController = null;
-		private static AndroidJavaObject jniCurrentActivity = null;
+//		private static AndroidJavaObject jniUnityEventHandler = null;
 #endif
 		
 		public static void Initialize(IStoreAssets storeAssets) {
@@ -41,62 +41,60 @@ namespace com.soomla.unity
 			}
 			//init SOOM_SEC
 #if UNITY_ANDROID
-			AndroidJavaClass jniStoreAssets = new AndroidJavaClass("com.soomla.unity.StoreAssets");
-			jniStoreAssets.CallStatic("setSoomSec", Soomla.GetInstance().soomSec);
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaClass jniStoreAssets = new AndroidJavaClass("com.soomla.unity.StoreAssets")) {
+				jniStoreAssets.CallStatic("setSoomSec", Soomla.GetInstance().soomSec);
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			storeController_SetSoomSec(Soomla.GetInstance().soomSec);
 #endif
 			
-			StoreInventory.Init();
 			StoreInfo.Initialize(storeAssets);
 #if UNITY_ANDROID
-			AndroidJavaClass jniUnityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
-			jniCurrentActivity = jniUnityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity");
-			
-			AndroidJavaObject jniStoreAssetsInstance = new AndroidJavaObject("com.soomla.unity.StoreAssets");
-			AndroidJavaClass jniStoreControllerClass = new AndroidJavaClass("com.soomla.store.StoreController");
-			jniStoreController = jniStoreControllerClass.CallStatic<AndroidJavaObject>("getInstance");
-			jniStoreController.Call("initialize", jniStoreAssetsInstance, Soomla.GetInstance().publicKey, Soomla.GetInstance().customSecret);
-			
-			//init StoreEventHandlers
-			AndroidJavaClass jniStoreEventHandlersClass = new AndroidJavaClass("com.soomla.store.StoreEventHandlers");
-			AndroidJavaObject jniStoreEventHandlersInstance = jniStoreEventHandlersClass.CallStatic<AndroidJavaObject>("getInstance");
-			AndroidJavaObject jniUnityEventHandler = new AndroidJavaObject("com.soomla.unity.EventHandler");
-			jniStoreEventHandlersInstance.Call("addEventHandler",jniUnityEventHandler);
-			
+			AndroidJNI.PushLocalFrame(100);
+			using(AndroidJavaObject jniStoreAssetsInstance = new AndroidJavaObject("com.soomla.unity.StoreAssets")) {
+				using(AndroidJavaClass jniStoreControllerClass = new AndroidJavaClass("com.soomla.store.StoreController")) {
+					jniStoreController = jniStoreControllerClass.CallStatic<AndroidJavaObject>("getInstance");
+					jniStoreController.Call("initialize", jniStoreAssetsInstance, Soomla.GetInstance().publicKey, Soomla.GetInstance().customSecret);
+				}
+			}
+			//init EventHandler
+			using(AndroidJavaClass jniEventHandler = new AndroidJavaClass("com.soomla.unity.EventHandler")) {
+				jniEventHandler.CallStatic("initialize");
+			}
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			storeController_Init(Soomla.GetInstance().customSecret);
 #endif
 		}
 		
 		
-		public static void BuyCurrencyPack(string packProductId) {
+		public static void BuyMarketItem(string packProductId) {
 #if UNITY_ANDROID
-			AndroidJNIHandler.CallVoid(jniStoreController, "buyCurrencyPack", packProductId);
+			AndroidJNI.PushLocalFrame(100);
+			AndroidJNIHandler.CallVoid(jniStoreController, "buyGoogleMarketItem", packProductId);
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
-			storeController_BuyCurrencyPack(packProductId);
+			storeController_BuyMarketItem(packProductId);
 #endif
 		}
 		
 		public static void BuyVirtualGood(string goodItemId) {
 #if UNITY_ANDROID
+			AndroidJNI.PushLocalFrame(100);
 			AndroidJNIHandler.CallVoid(jniStoreController, "buyVirtualGood", goodItemId);
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			storeController_BuyVirtualGood(goodItemId);
 #endif
 		}
 		
-		public static void BuyNonConsumableItem(string nonConsProductId) {
-#if UNITY_ANDROID
-			AndroidJNIHandler.CallVoid(jniStoreController, "buyManagedItem", nonConsProductId);
-#elif UNITY_IOS
-			storeController_BuyNonConsumableItem(nonConsProductId);
-#endif
-		}
-		
 		public static void EquipVirtualGood(string goodItemId) {
 #if UNITY_ANDROID
+			AndroidJNI.PushLocalFrame(100);
 			AndroidJNIHandler.CallVoid(jniStoreController, "equipVirtualGood", goodItemId);
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			storeController_EquipVirtualGood(goodItemId);
 #endif
@@ -104,7 +102,9 @@ namespace com.soomla.unity
 		
 		public static void UnEquipVirtualGood(string goodItemId) {
 #if UNITY_ANDROID
+			AndroidJNI.PushLocalFrame(100);
 			AndroidJNIHandler.CallVoid(jniStoreController, "unequipVirtualGood", goodItemId);
+			AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 			storeController_UnEquipVirtualGood(goodItemId);
 #endif
@@ -113,10 +113,18 @@ namespace com.soomla.unity
 		public static void StoreOpening() {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
-				AndroidJavaClass jniStoreAssets = new AndroidJavaClass("com.soomla.unity.StoreAssets");
-				jniStoreAssets.CallStatic("createHandler", jniCurrentActivity);
-				AndroidJavaObject jniHandler = jniStoreAssets.CallStatic<AndroidJavaObject>("getHandler");
-				jniStoreController.Call("storeOpening", jniCurrentActivity, jniHandler);
+				AndroidJNI.PushLocalFrame(100);
+				using(AndroidJavaClass jniUnityPlayerClass = new AndroidJavaClass("com.unity3d.player.UnityPlayer")){
+					using(AndroidJavaObject jniCurrentActivity = jniUnityPlayerClass.GetStatic<AndroidJavaObject>("currentActivity")) {
+						using(AndroidJavaClass jniStoreAssets = new AndroidJavaClass("com.soomla.unity.StoreAssets")) {
+							jniStoreAssets.CallStatic("createHandler", jniCurrentActivity);
+							using(AndroidJavaObject jniHandler = jniStoreAssets.CallStatic<AndroidJavaObject>("getHandler")) {
+								jniStoreController.Call("storeOpening", jniCurrentActivity, jniHandler);
+							}
+						}
+					}
+				}
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 				storeController_StoreOpening();
 #endif
@@ -126,7 +134,9 @@ namespace com.soomla.unity
 		public static void StoreClosing() {
 			if(!Application.isEditor){
 #if UNITY_ANDROID
+				AndroidJNI.PushLocalFrame(100);
 				jniStoreController.Call("storeClosing");
+				AndroidJNI.PopLocalFrame(IntPtr.Zero);
 #elif UNITY_IOS
 				storeController_StoreClosing();
 #endif

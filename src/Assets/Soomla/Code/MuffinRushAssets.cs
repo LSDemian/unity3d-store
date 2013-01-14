@@ -5,6 +5,10 @@ using System.Collections.Generic;
 namespace com.soomla.unity.example {
 	public class MuffinRushAssets : IStoreAssets{
 		
+		public int GetVersion() {
+			return 0;
+		}
+		
 		public VirtualCurrency[] GetVirtualCurrencies() {
 			return new VirtualCurrency[]{MUFFIN_CURRENCY};
 		}
@@ -21,8 +25,8 @@ namespace com.soomla.unity.example {
 			return new VirtualCategory[]{GENERAL_CATEGORY};
 		}
 		
-	    public MarketItem[] GetNonConsumableItems() {
-			return new MarketItem[]{NO_ADDS_NONCONS};
+	    public NonConsumableItem[] GetNonConsumableItems() {
+			return new NonConsumableItem[]{NO_ADDS_NONCONS};
 		}
 		
 	    /** Static Final members **/
@@ -37,7 +41,7 @@ namespace com.soomla.unity.example {
 	    /** Virtual Categories **/
 	    // The muffin rush theme doesn't support categories, so we just put everything under a general category.
 	    public static VirtualCategory GENERAL_CATEGORY = new VirtualCategory(
-	            "General", 0
+	            "General", 0, VirtualCategory.EquippingModel.MULTIPLE
 	    );
 	
 	    /** Virtual Currencies **/
@@ -55,7 +59,7 @@ namespace com.soomla.unity.example {
 	            "Customers buy a double portion on each purchase of this cake", // description
 	            new StaticPriceModel(MUFFINCAKE_PRICE), // currency value
 	            "fruit_cake",                                   // item id
-	            GENERAL_CATEGORY, false);
+	            GENERAL_CATEGORY);
 	
 	    private static Dictionary<string, int> PAVLOVA_PRICE =  new Dictionary<string, int>();
 		
@@ -64,7 +68,7 @@ namespace com.soomla.unity.example {
 	            "Gives customers a sugar rush and they call their friends", // description
 	            new StaticPriceModel(PAVLOVA_PRICE),  // currency value
 	            "pavlova",                                      // item id
-	            GENERAL_CATEGORY, false
+	            GENERAL_CATEGORY
 		);
 	
 	    private static Dictionary<string, int> CHOCLATECAKE_PRICE = new Dictionary<string, int>();
@@ -74,7 +78,7 @@ namespace com.soomla.unity.example {
 	            "A classic cake to maximize customer satisfaction",// description
 	            new StaticPriceModel(CHOCLATECAKE_PRICE),       // currency value
 	            "chocolate_cake",                               // item id
-	            GENERAL_CATEGORY, false
+	            GENERAL_CATEGORY
 		);
 	
 	    private static Dictionary<string, int> CREAMCUP_PRICE = new Dictionary<string, int>();
@@ -84,7 +88,7 @@ namespace com.soomla.unity.example {
 	            "Increase bakery reputation with this original pastry",   // description
 	            new StaticPriceModel(CREAMCUP_PRICE),           // currency value
 	            "cream_cup",                                    // item id
-	            GENERAL_CATEGORY, false
+	            GENERAL_CATEGORY
 		);
 		
 		/// <summary>
@@ -103,7 +107,7 @@ namespace com.soomla.unity.example {
 	            "10 Muffins",                                   // name
 	            "Test refund of an item",                       // description
 	            "muffins_10",                                   // item id
-	            TENMUFF_PACK_PRODUCT_ID,                        // product id in Google Market
+	            TENMUFF_PACK_PRODUCT_ID,                        // product id in Google Market AND App Store !
 	            0.99,                                           // actual price in $$
 	            10,                                             // number of currencies in the pack
 	            MUFFIN_CURRENCY
@@ -113,7 +117,7 @@ namespace com.soomla.unity.example {
 	            "50 Muffins",                                   // name
 	            "Test cancellation of an item",                 // description
 	            "muffins_50",                                   // item id
-	            FIFTYMUFF_PACK_PRODUCT_ID,                      // product id in Google Market
+	            FIFTYMUFF_PACK_PRODUCT_ID,                      // product id in Google Market AND App Store !
 	            1.99,                                           // actual price in $$
 	            50,                                             // number of currencies in the pack
 	            MUFFIN_CURRENCY
@@ -123,7 +127,7 @@ namespace com.soomla.unity.example {
 	            "400 Muffins",                                  // name
 	            "Test purchase of an item",                     // description
 	            "muffins_400",                                  // item id
-	            FORTYMUFF_PACK_PRODUCT_ID,                      // product id in Google Market
+	            FORTYMUFF_PACK_PRODUCT_ID,                      // product id in Google Market AND App Store !
 	            4.99,                                           // actual price in $$
 	            400,                                            // number of currencies in the pack
 	            MUFFIN_CURRENCY
@@ -133,7 +137,7 @@ namespace com.soomla.unity.example {
 	            "1000 Muffins",                                 // name
 	            "Test item unavailable",                        // description
 	            "muffins_1000",                                 // item id
-	            THOUSANDMUFF_PACK_PRODUCT_ID,                   // product id in Google Market
+	            THOUSANDMUFF_PACK_PRODUCT_ID,                   // product id in Google Market AND App Store !
 	            8.99,                                           // actual price in $$
 	            1000,                                           // number of currencies in the pack
 	            MUFFIN_CURRENCY
@@ -141,8 +145,8 @@ namespace com.soomla.unity.example {
 		
 	    /** Google MANAGED Items **/
 	
-	    public static MarketItem NO_ADDS_NONCONS  = new MarketItem(
-	            NO_ADDS_NONCONS_PRODUCT_ID, MarketItem.Consumable.NONCONSUMABLE
+	    public static NonConsumableItem NO_ADDS_NONCONS  = new NonConsumableItem("No Ads", "", "no_ads",
+	            NO_ADDS_NONCONS_PRODUCT_ID, 1.99
 	    );
 		
 	}

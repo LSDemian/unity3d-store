@@ -39,10 +39,10 @@
 
 - (void)initializeWithStoreAssets:(id<IStoreAsssets>)storeAssets andCustomSecret:(NSString*)secret;
 /**
- * Start a currency pack purchase process (with the App Store)
+ * Start an app-store item (CurrencyPack or NonConsumableItem) purchase process
  * productId is the product id of the required currency pack.
  */
-- (void)buyCurrencyPackWithProcuctId:(NSString*)productId;
+- (void)buyAppStoreItemWithProcuctId:(NSString*)productId;
 /**
  * Start a virtual goods purchase process.
  * itemId is the item id of the required virtual good.
@@ -50,11 +50,6 @@
  * throws VirtualItemNotFoundException
  */
 - (void)buyVirtualGood:(NSString*)itemId;
-/**
- * Start a NON-CONSUMABLE item purchase process.
- * productId is the product id of the NON-CONSUMABLE item to purchase.
- */
-- (void)buyNonConsumableItem:(NSString*)productId;
 /**
  * Call this function when you open the actual store window
  */

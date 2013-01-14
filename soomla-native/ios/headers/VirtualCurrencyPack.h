@@ -28,13 +28,12 @@
  * you'll define the app store's item in Itunes Connect.
  */
 @interface VirtualCurrencyPack : VirtualItem{
-    double  price;
     int     currencyAmount;
     VirtualCurrency* currency;
     AppStoreItem* appstoreItem;
 }
 
-@property double  price;
+
 @property int     currencyAmount;
 @property (retain, nonatomic) VirtualCurrency* currency;
 @property (retain, nonatomic) AppStoreItem* appstoreItem;

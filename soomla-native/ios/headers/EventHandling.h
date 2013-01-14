@@ -29,9 +29,13 @@ extern NSString * EVENT_CLOSING_STORE;
 extern NSString * EVENT_OPENING_STORE;
 extern NSString * EVENT_UNEXPECTED_ERROR_IN_STORE;
 extern NSString * EVENT_TRANSACTION_RESTORED;
+extern NSString * EVENT_TRANSACTION_RESTORED;
+extern NSString * EVENT_CHANGED_CURRENCY_BALANCE;
+extern NSString * EVENT_CHANGED_GOOD_BALANCE;
 
 @class AppStoreItem;
 @class VirtualGood;
+@class VirtualCurrency;
 
 /**
  * This class is used register and post all the supported events.
@@ -55,5 +59,7 @@ extern NSString * EVENT_TRANSACTION_RESTORED;
 + (void)postOpeningStore;
 + (void)postUnexpectedError;
 + (void)postTransactionRestored:(NSString*)productId;
++ (void)postChangedBalance:(int)balance forCurrency:(VirtualCurrency*)currency;
++ (void)postChangedBalance:(int)balance forGood:(VirtualGood*)good;
 
 @end

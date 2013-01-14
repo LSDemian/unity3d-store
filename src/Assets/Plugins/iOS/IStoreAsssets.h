@@ -23,6 +23,19 @@
 @protocol IStoreAsssets <NSObject>
 
 /**
+ * A version for your specific game's store assets
+ * 
+ * This value will determine if the saved data in the database will be deleted or not.
+ * Bump the version every time you want to delete the old data in the DB.
+ * If you don't bump this value, you won't be able to see changes you've made to the objects in this file.
+ *
+ * For example: If you previously created a VirtualGood with name "Hat" and you published your application,
+ * the name "Hat will be saved in any of your users' databases. If you want to change the name to "Green Hat"
+ * than you'll also have to bump the version (from 0 to 1). Now the new "Green Hat" name will replace the old one.
+ */
+- (int)getVersion;
+
+/**
  * A representation of your game's virtual currency.
  */
 - (NSArray*)virtualCurrencies;
@@ -53,6 +66,6 @@
  *
  * An array of all managed served in your game.
  */
-- (NSArray*)appStoreNonConsumableItems;
+- (NSArray*)nonConsumableItems;
 
 @end

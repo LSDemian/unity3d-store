@@ -2,23 +2,37 @@ using System;
 
 namespace com.soomla.unity.example
 {
-	public class ExampleEventHandler : IStoreEventHandler
+	public class ExampleEventHandler
 	{
 		
 		public ExampleEventHandler ()
 		{
+			Events.OnMarketPurchase += onMarketPurchase;
+			Events.OnMarketRefund += onMarketRefund;
+			Events.OnVirtualGoodPurchased += onVirtualGoodPurchased;
+			Events.OnVirtualGoodEquipped += onVirtualGoodEquipped;
+			Events.OnVirtualGoodUnEquipped += onVirtualGoodUnequipped;
+			Events.OnBillingSupported += onBillingSupported;
+			Events.OnBillingNotSupported += onBillingNotSupported;
+			Events.OnMarketPurchaseProcessStarted += onMarketPurchaseProcessStarted;
+			Events.OnGoodsPurchaseProcessStarted += onGoodsPurchaseProcessStarted;
+			Events.OnClosingStore += onClosingStore;
+			Events.OnOpeningStore += onOpeningStore;
+			Events.OnUnexpectedErrorInStore += onUnexpectedErrorInStore;
+			Events.OnCurrencyBalanceChanged += onCurrencyBalanceChanged;
+			Events.OnGoodBalanceChanged += onGoodBalanceChanged;
 		}
 		
 		public void onMarketPurchase(MarketItem marketItem) {
-			ExampleLocalStoreInfo.UpdateBalances();
+			
 		}
 		
 		public void onMarketRefund(MarketItem marketItem) {
-			ExampleLocalStoreInfo.UpdateBalances();
+
 		}
 		
 		public void onVirtualGoodPurchased(VirtualGood good) {
-			ExampleLocalStoreInfo.UpdateBalances();
+
 		}
 		
 		public void onVirtualGoodEquipped(VirtualGood good) {
@@ -55,6 +69,14 @@ namespace com.soomla.unity.example
 		
 		public void onOpeningStore() {
 			
+		}
+		
+		public void onCurrencyBalanceChanged(VirtualCurrency virtualCurrency, int balance) {
+			ExampleLocalStoreInfo.UpdateBalances();
+		}
+		
+		public void onGoodBalanceChanged(VirtualGood good, int balance) {
+			ExampleLocalStoreInfo.UpdateBalances();
 		}
 	}
 }

@@ -30,12 +30,14 @@ typedef enum {
 @interface AppStoreItem : NSObject{
     NSString* productId;
     Consumable consumable;
+    double  price;
 }
 
 @property (nonatomic, retain) NSString* productId;
 @property Consumable consumable;
+@property double  price;
 
-- (id)initWithProductId:(NSString*)oProductId andConsumable:(Consumable)oConsumable;
+- (id)initWithProductId:(NSString*)oProductId andConsumable:(Consumable)oConsumable andPrice:(double)oPrice;
 - (id)initWithDictionary:(NSDictionary*)dict;
 - (NSDictionary*)toDictionary;
 
