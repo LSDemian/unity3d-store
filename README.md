@@ -103,7 +103,8 @@ StoreController.BuyCurrencyPack(TEN_COINS_PACK.MarketItem.ProductId);
 ```
     
 And that's it! unity3d-store knows how to contact Google Play or the App Store for you and redirect the user to the purchasing mechanism.
-Don't forget to define your _IStoreEventHandler_ in order to get the events of successful or failed purchases (see [Event Handling](https://github.com/soomla/unity3d-store#event-handling)).
+Don't forget to subscribe to store events in order to get the notified of successful or failed purchases (see [Event Handling](https://github.com/soomla/unity3d-store#event-handling)).
+
 
 Storage & Meta-Data
 ---
