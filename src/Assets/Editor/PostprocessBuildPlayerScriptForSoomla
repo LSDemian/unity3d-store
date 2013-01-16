@@ -6,8 +6,10 @@ $currDir = $ARGV[0];
 $find = "_;@#";
 $replace = " ";
 $find = quotemeta $find;
+$installPath =~ s/$find/$replace/g;
 $currDir =~ s/$find/$replace/g;
 chomp $currDir; 
+chomp $installPath;
 
 `python2.6 \'$currDir/Editor/SoomlaRunner.py\' \'$installPath\'`;
 

@@ -18,7 +18,7 @@ public class PostProcessScriptStarter : MonoBehaviour {
 		proc.StartInfo.RedirectStandardError = true;
 		proc.EnableRaisingEvents=false; 
 		proc.StartInfo.FileName = Application.dataPath + "/Editor/PostprocessBuildPlayerScriptForSoomla";
-		proc.StartInfo.Arguments = Application.dataPath.Replace(" ", "_;@#") + " " + pathToBuiltProject ;
+		proc.StartInfo.Arguments = Application.dataPath.Replace(" ", "_;@#") + " " + pathToBuiltProject.Replace(" ", "_;@#") ;
 		proc.Start();
 		string output = proc.StandardOutput.ReadToEnd();
 		string err = proc.StandardError.ReadToEnd();
