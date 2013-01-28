@@ -3,7 +3,7 @@
 Haven't you ever wanted an in-app purchase one liner that looks like this ?!
 
 ```cs
-    StoreController.BuyCurrencyPack("[Product id here]");
+    StoreController.BuyMarketItem("[Product id here]");
 ```
 
 unity3d-store
@@ -99,7 +99,7 @@ VirtualCurrencyPack TEN_COINS_PACK = new VirtualCurrencyPack(
 Now you can use _StoreController_ to call Google Play or the App Store's in-app purchasing mechanism:
 
 ```cs
-StoreController.BuyCurrencyPack(TEN_COINS_PACK.MarketItem.ProductId);
+StoreController.BuyMarketItem(TEN_COINS_PACK.MarketItem.ProductId);
 ```
     
 And that's it! unity3d-store knows how to contact Google Play or the App Store for you and redirect the user to the purchasing mechanism.
