@@ -45,7 +45,7 @@ Getting Started (with debug & release)
     - "Public Key" - is the public key given to you from Google. (iOS doesn't have a public key).
     - "Soom Sec" - is a special secret SOOMLA uses to increase your data protection.  
     **Choose both secrets wisely. You can't change them after you launch your game!**
-4. Create your own implementation of _IStoreAssets_ in order to describe your specific game's assets ([example](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/MuffinRushAssets.cs)). Initialize _StoreController_ with the class you just created:
+4. Create your own implementation of _IStoreAssets_ in order to describe your specific game's assets ([example](https://github.com/soomla/unity3d-store/blob/master/unity4.0/Assets/Soomla/Code/MuffinRushAssets.cs)). Initialize _StoreController_ with the class you just created:
 
     ```cs
        StoreController.Initialize(new YourStoreAssetsImplementation());
@@ -78,7 +78,7 @@ And that's it ! You have storage and in-app purchasing capabilities... ALL-IN-ON
 What's next? In App Purchasing.
 ---
 
-unity3d-store provides you with VirtualCurrencyPacks. VirtualCurrencyPack is a representation of a "bag" of currency units that you want to let your users purchase in Google Play or App Store. You define VirtualCurrencyPacks in your game specific assets file which is your implementation of `IStoreAssets` ([example](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/MuffinRushAssets.cs)). After you do that you can call _StoreController_ to make actual purchases and unity3d-store will take care of the rest.
+unity3d-store provides you with VirtualCurrencyPacks. VirtualCurrencyPack is a representation of a "bag" of currency units that you want to let your users purchase in Google Play or App Store. You define VirtualCurrencyPacks in your game specific assets file which is your implementation of `IStoreAssets` ([example](https://github.com/soomla/unity3d-store/blob/master/unity4.0/Assets/Soomla/Code/MuffinRushAssets.cs)). After you do that you can call _StoreController_ to make actual purchases and unity3d-store will take care of the rest.
 
 Example:
 
@@ -112,7 +112,7 @@ Storage & Meta-Data
 When you initialize _StoreController_, it automatically initializes two other classes: _StoreInventory_ and _StoreInfo_.
 - _StoreInventory_ is a convenience class to let you perform operations on VirtualCurrencies and VirtualGoods. Use it to fetch/change the balances of VirtualItems in your game (using their ItemIds!)
 - _StoreInfo_ is where all meta data information about your specific game can be retrieved. It is initialized with your implementation of `IStoreAssets` and you can use it to retrieve information about your specific game.
-**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you should make as little calls as possible to _StoreInfo_. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to _StoreInfo_. We update this cache using an event handler. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleLocalStoreInfo.cs) and [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/src/Assets/Soomla/Code/ExampleEventHandler.cs)).**
+**ATTENTION: because we're using JNI (Android) and DllImport (iOS) you should make as little calls as possible to _StoreInfo_. Look in the example project for the way we created a sort of a cache to hold your game's information in order to not make too many calls to _StoreInfo_. We update this cache using an event handler. (see [ExampleLocalStoreInfo](https://github.com/soomla/unity3d-store/blob/master/unity4.0/Assets/Soomla/Code/ExampleLocalStoreInfo.cs) and [ExampleEventHandler](https://github.com/soomla/unity3d-store/blob/master/unity4.0/Assets/Soomla/Code/ExampleEventHandler.cs)).**
 
 The on-device storage is encrypted and kept in a SQLite database. SOOMLA is preparing a cloud-based storage service that will allow this SQLite to be synced to a cloud-based repository that you'll define.
 
