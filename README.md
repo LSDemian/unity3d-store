@@ -26,14 +26,23 @@ We've created 2 unitypackages and one example project:
 - The **debug** version can be used for debugging (well... duh!). It'll print out various log messages that can help you understand how to fix things. If you want to ask a question, we'll need you to run with this unitypackage and show us the log.  
 - On Android, there's another difference between **debug** and **release** versions. The difference is that when you run the **debug** you'll be able to test actual purchases (without even providing a valid public key) while with the **release** version you'll actually have to provide a valid public key and upload the app binary to the dev console and do all the rest of Google's requirements.
 
-[unity3d-store v0.2 debug](http://bit.ly/SA1znS)  
-[unity3d-store v0.2 release](http://bit.ly/103bzZ4)
+** Unity 4.0 **
+[unity3d-store v0.2 debug](http://goo.gl/N4ZwR)  
+[unity3d-store v0.2 release](http://goo.gl/6R7J7)
+
+** Unity 3.5 **
+[unity3d-store v0.2 debug](http://goo.gl/Dt9Of)  
+[unity3d-store v0.2 release](http://goo.gl/MUZvZ)
 
 ####unity3d-store v0.2 example
 
 - The example project is mostly what you have in this Github repo. You can either download it or clone unity3d-store.
 
-[unity3d-store v0.2 example](http://bit.ly/WH1eew)
+** Unity 4.0 **
+[unity3d-store v0.2 example](http://goo.gl/bhS7K)
+
+** Unity 3.5 **
+[unity3d-store v0.2 example](http://goo.gl/Nb8WC)
 
 Getting Started (with debug & release)
 ---
